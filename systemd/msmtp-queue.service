@@ -1,0 +1,11 @@
+[Unit]
+Description=Flush msmtp queue
+After=keyring.target network.target
+ConditionPathExistsGlob=%h/.local/share/mail.queue/*.mail
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/msmtpq-flush
+
+[Install]
+Also=msmtp-queue.timer

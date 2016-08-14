@@ -1,0 +1,72 @@
+#!/bin/bash
+set -e
+set -o pipefail
+shopt -s nullglob
+
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/msmtp/config"
+QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mail.queue"
+LOG="${XDG_LOG_HOME:-$HOME/.local/log}/msmtp.log"
+
+exec {stdout}>&1
+coproc logger {(while read line; do echo "$(date -Iseconds) $line"; done >>"$LOG";); }
+exec >&${logger[1]} 2>&1
+
+lock() {
+    local lock_fd
+    local path="${!#}"
+    exec {lock_fd}<"$path"
+    flock "$lock_fd"
+}
+
+msg() {
+    echo "$(date -Iseconds) $1" >&$stdout
+}
+
+[[ -d "$QUEUE_DIR" ]] || mkdir -m0700 -p "$QUEUE_DIR"
+
+if [[ ! -w "$QUEUE_DIR" ]]; then
+    echo "Insufficient privileges to write to queue."
+    exit 1
+fi
+
+if ! lock -n -x "$QUEUE_DIR"; then
+    msg "Already running..."
+    exit 0
+fi
+
+if ! ping -qnc1 -w4 example.com >/dev/null 2>&1; then
+    echo "Not Online"
+    exit 0
+fi
+
+for mail in "$QUEUE_DIR"/*.mail/; do
+    id="$(basename "$mail")"
+    prefix="mail [ $id ]"
+    if [[ ! -r "$mail/msmtp_flags" ]]; then
+        echo "$prefix failed to send message; missing flags"
+        continue
+    fi
+    if [[ ! -r "$mail/message" ]]; then
+        echo "$prefix failed to send message; missing message"
+        continue
+    fi
+
+    if [[ ! -w "$mail" ]]; then
+        echo "$prefix failed to send message; insufficient privileges"
+        continue
+    fi
+
+    prefix="$prefix [ $(xargs -0 -a "$mail/msmtp_flags" printf '%s ')]"
+
+    echo "$prefix sending"
+    xargs -0 -a "$mail/msmtp_flags" msmtp -C "$CONFIG" -X - < "$mail/message"
+    ret="$?"
+    if [[ ! "$ret" -eq 0 ]] ; then
+        echo "$prefix faild to send; msmtp rc = $ret"
+        continue
+    fi
+    if ! rm -rf "$mail"; then
+        echo "$prefix sent but not purged from queue!?"
+    fi
+done
+

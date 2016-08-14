@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mail.queue"
+
+[[ -d "$QUEUE_DIR" ]] || mkdir -m0700 -p "$QUEUE_DIR"
+
+if [[ ! -w "$QUEUE_DIR" ]]; then
+    echo "Insufficient privileges to write to queue."
+    exit 1
+fi
+
+TMP_DIR=$(mktemp -d "$QUEUE_DIR/.tmpXXXXXXXXXX")
+bail() {
+    ret="$?"
+    if [[ "$ret" -eq 0 ]]; then
+        echo "Canceled. Not queuing message."
+    fi
+    rm -rf "$TMP_DIR"
+}
+trap bail EXIT
+
+printf '%s\0' "$@" > "$TMP_DIR/msmtp_flags"
+cat > "$TMP_DIR/message"
+
+while [[ -d "$TMP_DIR" ]]; do
+    MESSAGE_DIR="$(date +"$HOSTNAME-%s%N-P$$.mail")"
+    # Atomic rename.
+    mv -n -T "$TMP_DIR" "$QUEUE_DIR/$MESSAGE_DIR"
+done
+
+trap - EXIT

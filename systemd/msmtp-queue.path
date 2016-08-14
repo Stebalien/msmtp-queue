@@ -1,0 +1,8 @@
+[Unit]
+Description=Flush msmtp queue when a message is queued.
+
+[Path]
+PathExistsGlob=%h/.local/share/mail.queue/*.mail
+
+[Install]
+WantedBy=paths.target

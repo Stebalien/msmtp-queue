@@ -1,0 +1,8 @@
+[Unit]
+Description=Timer to flush msmtp queue
+
+[Timer]
+OnUnitInactiveSec=10m
+
+[Install]
+WantedBy=timers.target
