@@ -22,7 +22,12 @@ msg() {
     echo "$(date -Iseconds) $1" >&$stdout
 }
 
-[[ -d "$QUEUE_DIR" ]] || mkdir -m0700 -p "$QUEUE_DIR"
+# Anything to do?
+DIRS=("$QUEUE_DIR"/*.mail/)
+if [[ ${#DIRS} -eq 0 ]]; then
+    exit 0
+fi
+unset DIRS # Recompute this later as it can change (look ma, no locks!)...
 
 if [[ ! -w "$QUEUE_DIR" ]]; then
     echo "Insufficient privileges to write to queue."
