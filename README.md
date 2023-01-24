@@ -1,16 +1,16 @@
-A simple set of scripts/units for queuing and sending messages with msmtp.
+# A simple set of scripts/units for queuing and sending messages with msmtp.
 
 * `msmtpq` is a drop-in replacement for `msmtp` to queue an outgoing
   message. It never blocks and never actually sends messages.
 * `msmtpq-flush` sends reliably queued messages.
 
-To use:
+## To use:
 
 1. Send messages with `msmtpq` instead of `msmtp`.
 2. Install and enable the provided systemd units to automatically flush queued
    messages.
    
-Systemd Units:
+## Systemd Units:
 
 * `msmtp-queue.service` - Invokes msmtpq-flush to flush queued messages, if any.
 * `msmtp-queue.timer` - Invokes msmtp-queue.service every 10 minutes. This will
@@ -29,6 +29,20 @@ Also note, these scripts look for/put configs/logs in non-standard directories:
 * QUEUE_DIR (mail queue): `$XDG_DATA_HOME/mail.queue`.
 
 These are defined as variables at the top of the provided scripts.
+
+## Install:
+
+This is a highly simplified script assuming you already have the above-mentioned 
+msmtp config file and set up XDG variables.
+
+```
+git clone https://github.com/Stebalien/msmtp-queue.git /tmp/msmtpq
+sudo cp /tmp/msmtpq/msmtpq* /usr/local/bin
+mkdir -p ~/.config/systemd/user $XDG_DATA_HOME/mail.queue
+cp /tmp/msmtpq/systemd/msmtp-queue.* ~/.config/systemd/user
+systemctl --user enable msmtp-queue.path msmtp-queue.timer
+```
+Afterwards, update your mutt configuration to use msmtpq instead of msmtp.
 
 ---
 
