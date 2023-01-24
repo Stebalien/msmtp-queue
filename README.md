@@ -24,7 +24,7 @@ message while offline, they'll only re-try once every 10 minutes.
 
 Also note, these scripts look for/put configs/logs in non-standard directories:
 
-* GONFIG (msmtp config): `$XDG_COFIG_HOME/msmtp/config`.
+* GONFIG (msmtp config): `$XDG_CONFIG_HOME/msmtp/config`.
 * LOG: `$XDG_LOG_HOME/msmtp.log` (`$XDG_LOG_HOME` defaults to `~/.local/log`).
 * QUEUE_DIR (mail queue): `$XDG_DATA_HOME/mail.queue`.
 
