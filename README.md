@@ -30,13 +30,18 @@ Also note, these scripts look for/put configs/logs in non-standard directories:
 
 These are defined as variables at the top of the provided scripts.
 
+### MacOS launchd
+* `launchd/name.neuhalfen.msmtpq-watcher.plist` - launchd service that watches the spool directory
+
 ## Install:
 
 This is a highly simplified script assuming you already have the above-mentioned 
 msmtp config file and set up XDG variables.
 
+
+### Linux
 ```
-git clone https://github.com/Stebalien/msmtp-queue.git /tmp/msmtpq
+git clone https://github.com/neuhalje/msmtp-queue.git /tmp/msmtpq
 sudo cp /tmp/msmtpq/msmtpq* /usr/local/bin
 mkdir -p ~/.config/systemd/user $XDG_DATA_HOME/mail.queue
 cp /tmp/msmtpq/systemd/msmtp-queue.* ~/.config/systemd/user
@@ -44,6 +49,25 @@ systemctl --user enable msmtp-queue.path msmtp-queue.timer
 ```
 Afterwards, update your mutt configuration to use msmtpq instead of msmtp.
 
+### MacOS
+MacOS needs a current bash from homebrew, else the stone age bash (3.x) from MacOS will err on the scripts.
+
+```
+brew install flock bash msmtp
+
+git clone https://github.com/neuhalje/msmtp-queue.git /tmp/msmtpq
+sudo cp /tmp/msmtpq/msmtpq* /usr/local/bin
+mkdir -p ~/.config/systemd/user $XDG_DATA_HOME/mail.queue
+
+cp launchd/*  ~/Library/LaunchAgents/
+
+launchctl unload ~/Library/LaunchAgents/name.neuhalfen.msmtpq-watcher.plist 
+launchctl load ~/Library/LaunchAgents/name.neuhalfen.msmtpq-watcher.plist 
+launchctl start name.neuhalfen.msmtpq-watcher
+```
+
+
+Afterwards, update your mutt configuration to use msmtpq instead of msmtp.
 ---
 
 WHY? Because it's pretty much-bullet proof and the default scripts were NIH.
