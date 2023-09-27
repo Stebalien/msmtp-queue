@@ -44,6 +44,9 @@ systemctl --user enable msmtp-queue.path msmtp-queue.timer
 ```
 Afterwards, update your mutt configuration to use msmtpq instead of msmtp.
 
+# MacOS
+[This fork](https://github.com/neuhalje/msmtp-queue/) maintains a MacOS/homebrew port.
+
 ---
 
 WHY? Because it's pretty much-bullet proof and the default scripts were NIH.
