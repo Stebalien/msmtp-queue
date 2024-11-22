@@ -67,7 +67,7 @@ for mail in "$QUEUE_DIR"/*.mail/; do
     xargs -0 -a "$mail/msmtp_flags" msmtp -C "$CONFIG" -X - < "$mail/message"
     ret="$?"
     if [[ ! "$ret" -eq 0 ]] ; then
-        echo "$prefix faild to send; msmtp rc = $ret"
+        echo "$prefix failed to send; msmtp rc = $ret"
         continue
     fi
     if ! rm -rf "$mail"; then
