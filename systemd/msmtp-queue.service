@@ -1,8 +1,7 @@
 [Unit]
 Description=Flush msmtp queue
 After=keyring.target network.target
-# Reenable once #3963 is fixed
-#ConditionPathExistsGlob=%h/.local/share/mail.queue/*.mail
+ConditionPathExistsGlob=%h/.local/share/mail.queue/*.mail
 
 [Service]
 Type=oneshot
