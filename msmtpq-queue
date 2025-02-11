@@ -55,7 +55,7 @@ shift $((OPTIND-1))
 
 # This script shows the contents of the msmtpq queue directory
 
-QUEUE_COUNT=$(ls -A "$QUEUE_DIR" | wc -l)
+QUEUE_COUNT=$(ls -1qA "$QUEUE_DIR" | wc -l)
 
 [[ $COUNT_ONLY -eq 1 ]] && echo "$QUEUE_COUNT" && exit 0
 
@@ -67,7 +67,6 @@ for msg in "$QUEUE_DIR"/*/message; do
   echo '---'
   msgid=$(dirname "$msg" | xargs basename)
   echo "msg: $msgid"
-  grep -E '^(From|To|Subject):' "$msg" | sed 's/^/  /'
+  sed -n 's/^\(From\|To\|Subject\):/  &/p' "$msg"
   [[ $SHOW_FILE_PATH -eq 1 ]] && echo "  file: $msg"
 done
-
