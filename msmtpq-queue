@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+
+QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mail.queue"
+
+[[ -d "$QUEUE_DIR" ]] || mkdir -m0700 -p "$QUEUE_DIR"
+
+if [[ ! -w "$QUEUE_DIR" ]]; then
+    echo "Insufficient privileges to write to queue."
+    exit 1
+fi
+if [[ ! -r "$QUEUE_DIR" ]]; then
+    echo "Insufficient privileges to read from queue."
+    exit 1
+fi
+
+HELP_TEXT="
+msmtpq-queue shows information about queued messages in
+the msmtpq-queue QUEUE_DIR.
+
+  current value: $QUEUE_DIR
+
+Usage:
+
+  -h    # this help
+  -c    # print count of queued messages and exit
+  -p    # include the full message file path
+"
+
+COUNT_ONLY=0
+SHOW_FILE_PATH=0
+# read in the options
+while getopts "cph" o; do
+    case "${o}" in
+        h)
+          # show help
+          echo "$HELP_TEXT"
+          exit 0
+          ;;
+        c)
+          COUNT_ONLY=1
+          ;;
+        p)
+          SHOW_FILE_PATH=1
+          ;;
+        *)
+          echo "$HELP_TEXT"
+          exit 1
+          ;;
+    esac
+done
+shift $((OPTIND-1))
+
+# This script shows the contents of the msmtpq queue directory
+
+QUEUE_COUNT=$(ls -1qA "$QUEUE_DIR" | wc -l)
+
+[[ $COUNT_ONLY -eq 1 ]] && echo "$QUEUE_COUNT" && exit 0
+
+[[ $QUEUE_COUNT -eq 0 ]] && echo "no messages queued" && exit 0
+
+echo "$QUEUE_COUNT messages queued"
+
+for msg in "$QUEUE_DIR"/*/message; do
+  echo '---'
+  msgid=$(dirname "$msg" | xargs basename)
+  echo "msg: $msgid"
+  sed -n 's/^\(From\|To\|Subject\):/  &/p' "$msg"
+  [[ $SHOW_FILE_PATH -eq 1 ]] && echo "  file: $msg"
+done
