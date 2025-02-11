@@ -24,10 +24,9 @@ the msmtpq-queue QUEUE_DIR.
 
 Usage:
 
-  -c    # print the count and exit
-  -p    # include the full message file path
   -h    # this help
-
+  -c    # print count of queued messages and exit
+  -p    # include the full message file path
 "
 
 COUNT_ONLY=0

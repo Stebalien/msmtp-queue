@@ -3,12 +3,18 @@
 * `msmtpq` is a drop-in replacement for `msmtp` to queue an outgoing
   message. It never blocks and never actually sends messages.
 * `msmtpq-flush` sends reliably queued messages.
+* `msmtpq-queue` shows information about queued messages.
 
 ## To use:
 
 1. Send messages with `msmtpq` instead of `msmtp`.
 2. Install and enable the provided systemd units to automatically flush queued
    messages.
+3. Use `msmtmpq-queue` to see information about the messages.
+   - `-h` help / usage
+   - `-c` print count of queued messages and exit
+   - `-f` include the full message file path
+
    
 ## Systemd Units:
 
