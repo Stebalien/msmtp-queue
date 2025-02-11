@@ -10,7 +10,6 @@ if [[ ! -w "$QUEUE_DIR" ]]; then
     echo "Insufficient privileges to write to queue."
     exit 1
 fi
-  
 if [[ ! -r "$QUEUE_DIR" ]]; then
     echo "Insufficient privileges to read from queue."
     exit 1
