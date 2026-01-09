@@ -24,10 +24,16 @@ trap bail EXIT
 printf '%s\0' "$@" > "$TMP_DIR/msmtp_flags"
 cat > "$TMP_DIR/message"
 
-while [[ -d "$TMP_DIR" ]]; do
-    MESSAGE_DIR="$(date +"$HOSTNAME-%s%N-P$$.mail")"
-    # Atomic rename.
-    mv -n -T "$TMP_DIR" "$QUEUE_DIR/$MESSAGE_DIR"
+tries=0
+while
+    mv -n -T "$TMP_DIR" "$QUEUE_DIR/$(date +"$HOSTNAME-%s%N-P$$.mail")"
+    [[ -d "$TMP_DIR" ]]
+do
+    tries=$(( tries + 1 ))
+    if [[ "$tries" -ge 3 ]]; then
+        echo "Failed to enqueue message $tries times."
+        exit 1
+    fi
 done
 
 trap - EXIT
