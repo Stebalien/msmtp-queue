@@ -23,15 +23,14 @@
   allow you to send mail while offline.
 * `msmtp-queue.path` - Invokes msmtp-queue.service immediately when a message is
   queued. This is the fast-path for sending mail immediately you're online.
-  
+
 These scripts really shouldn't ever *eat* your mail although you may end up
 sending the same email twice on very rare occasions. However, if you send a
 message while offline, they'll only re-try once every 10 minutes.
 
 Also note, these scripts look for/put configs/logs in non-standard directories:
 
-* GONFIG (msmtp config): `$XDG_CONFIG_HOME/msmtp/config`.
-* LOG: `$XDG_LOG_HOME/msmtp.log` (`$XDG_LOG_HOME` defaults to `~/.local/log`).
+* LOG: `$XDG_STATE_HOME/msmtp/queue.log` (`$XDG_STATE_HOME` defaults to `~/.local/state`).
 * QUEUE_DIR (mail queue): `$XDG_DATA_HOME/mail.queue`.
 
 These are defined as variables at the top of the provided scripts.
