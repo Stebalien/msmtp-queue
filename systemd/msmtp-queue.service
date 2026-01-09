@@ -1,7 +1,7 @@
 [Unit]
 Description=Flush msmtp queue
 After=keyring.target network.target
-ConditionPathExistsGlob=%h/.local/share/mail.queue/*.mail
+ConditionPathExistsGlob=%D/msmtp/queue/*.mail
 
 [Service]
 Type=oneshot
