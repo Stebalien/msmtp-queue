@@ -39,11 +39,6 @@ if ! lock -n -x "$QUEUE_DIR"; then
     exit 0
 fi
 
-if ! ping -qnc1 -w4 example.com >/dev/null 2>&1; then
-    echo "Not Online"
-    exit 0
-fi
-
 for mail in "$QUEUE_DIR"/*.mail/; do
     id="$(basename "$mail")"
     prefix="mail [ $id ]"
