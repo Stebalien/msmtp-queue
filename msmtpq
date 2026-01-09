@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mail.queue"
+QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/msmtp/queue"
 
 [[ -d "$QUEUE_DIR" ]] || mkdir -m0700 -p "$QUEUE_DIR"
 

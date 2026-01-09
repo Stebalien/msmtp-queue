@@ -31,27 +31,25 @@ message while offline, they'll only re-try once every 10 minutes.
 Also note, these scripts look for/put configs/logs in non-standard directories:
 
 * LOG: `$XDG_STATE_HOME/msmtp/queue.log` (`$XDG_STATE_HOME` defaults to `~/.local/state`).
-* QUEUE_DIR (mail queue): `$XDG_DATA_HOME/mail.queue`.
+* QUEUE_DIR (mail queue): `$XDG_DATA_HOME/msmtp/queue`.
 
 These are defined as variables at the top of the provided scripts.
 
-## Install:
+## Installation
 
-This is a highly simplified script assuming you already have the above-mentioned 
+This is a highly simplified script assuming you already have the above-mentioned
 msmtp config file and set up XDG variables.
 
-```
+```sh
 git clone https://github.com/Stebalien/msmtp-queue.git /tmp/msmtpq
 sudo cp /tmp/msmtpq/msmtpq* /usr/local/bin
 mkdir -p ~/.config/systemd/user $XDG_DATA_HOME/mail.queue
 cp /tmp/msmtpq/systemd/msmtp-queue.* ~/.config/systemd/user
 systemctl --user enable msmtp-queue.path msmtp-queue.timer
 ```
+
 Afterwards, update your mutt configuration to use msmtpq instead of msmtp.
 
 # MacOS
+
 [This fork](https://github.com/neuhalje/msmtp-queue/) maintains a MacOS/homebrew port.
-
----
-
-WHY? Because it's pretty much-bullet proof and the default scripts were NIH.

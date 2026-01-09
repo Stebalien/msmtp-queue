@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 shopt -s nullglob
 
-QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/mail.queue"
+QUEUE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/msmtp/queue"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/msmtp/"
 LOG_FILE="${LOG_DIR}/queue.log"
 
