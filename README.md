@@ -5,7 +5,17 @@
 * `msmtpq-flush` sends reliably queued messages.
 * `msmtpq-queue` shows information about queued messages.
 
-## To use:
+## Motivation
+
+Upstream [msmtp](https://marlam.de/msmtp/) comes with not one but _two_ different offline queue mail sending queue scripts. Unfortunately:
+
+1. The older one is simpler and easier to understand, but also less well maintained.
+2. The newer one tries to do way too much and that makes me nervous.
+3. Both use lock "files" instead of advisory locks. I don't want my mail queue to get stuck any time my queue flushing process gets killed while attempting to flush the queue.
+4. Neither use follow the XDG spec.
+5. They don't provide systemd integration.
+
+## Usage
 
 1. Send messages with `msmtpq` instead of `msmtp`.
 2. Install and enable the provided systemd units to automatically flush queued
@@ -15,8 +25,7 @@
    - `-c` print count of queued messages and exit
    - `-f` include the full message file path
 
-   
-## Systemd Units:
+## Systemd Units
 
 * `msmtp-queue.service` - Invokes msmtpq-flush to flush queued messages, if any.
 * `msmtp-queue.timer` - Invokes msmtp-queue.service every 10 minutes. This will
