@@ -9,19 +9,29 @@ LOG_FILE="${LOG_DIR}/queue.log"
 
 mkdir -p "$LOG_DIR"
 
+# Copy the original STDOUT so we can write output.
 exec {stdout}>&1
-coproc logger {(while read -r line; do echo "$(date -Iseconds) $line"; done >>"${LOG_FILE}";); }
-exec >&"${logger[1]}" 2>&1
+msg() {
+    echo "$(date -Iseconds) $1" >&$stdout
+}
+
+# Redirect stdout to a log, and add dates/times to each line.
+exec > >(while read -r line; do
+             echo "$(date -Iseconds) $line"
+         done >>"${LOG_FILE}") 2>&1
+
+# Wait to finish logging on exit.
+bail() {
+    exec 1>&- 2>&-
+    wait
+}
+trap bail EXIT
 
 lock() {
     local lock_fd
     local path="${!#}"
     exec {lock_fd}<"$path"
     flock "$lock_fd"
-}
-
-msg() {
-    echo "$(date -Iseconds) $1" >&$stdout
 }
 
 # Anything to do?
