@@ -76,7 +76,8 @@
             enable = lib.mkEnableOption "enable the systemd units for msmtpq";
             package = lib.mkPackageOption self'.packages "msmtpq" { };
           };
-          config = lib.mkIf cfg.install {
+          config = lib.mkIf cfg.enable {
+            environment.systemPackages = [ cfg.package ];
             systemd = {
               packages = [ cfg.package ];
               user.paths.msmtp-queue.wantedBy = [ "paths.target" ];
