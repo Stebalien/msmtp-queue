@@ -81,7 +81,7 @@
             systemd = {
               packages = [ cfg.package ];
               user.paths.msmtp-queue.wantedBy = [ "paths.target" ];
-              user.timer.msmtp-queue.wantedBy = [ "timers.target" ];
+              user.timers.msmtp-queue.wantedBy = [ "timers.target" ];
             };
           };
         });
