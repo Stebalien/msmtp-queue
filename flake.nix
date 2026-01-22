@@ -3,24 +3,21 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
   };
 
-  outputs = inputs @ { flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } (
-    { moduleWithSystem, ... }:
-    {
-      systems = [
+  outputs = { self, nixpkgs }:
+    let
+      eachSystem = nixpkgs.lib.genAttrs [
         "i686-linux"
         "x86_64-linux"
         "aarch64-linux"
         "armv7l-linux"
       ];
-      imports = [ flake-parts.flakeModules.easyOverlay ];
-      perSystem = { config, system, lib, pkgs, ...}:
+    in
+    {
+      packages = eachSystem (system:
         let
+          pkgs = import nixpkgs { inherit system; };
           msmtpq = (pkgs.resholve.mkDerivation {
             pname = "msmtpq";
             version = "1.0.0";
@@ -56,25 +53,25 @@
                 --replace-fail '/usr/local/bin/msmtpq-flush' "$out/bin/msmtpq-flush"
             '' + old.preFixup;
           });
-        in rec {
-          packages = {
-            inherit msmtpq;
-            default = packages.msmtpq;
-          };
-          overlayAttrs = {
-            inherit (config.packages) msmtpq;
-          };
-        };
-      flake.nixosModules.default = moduleWithSystem (
-        perSystem@{pkgs, self', ... }:
-        nixos@{lib, config, ... }:
+        in
+        {
+          inherit msmtpq;
+          default = msmtpq;
+        }
+      );
+
+      overlays.default = final: prev: {
+        inherit (self.packages.${final.system}) msmtpq;
+      };
+
+      nixosModules.default = { lib, config, pkgs, ... }:
         let
           cfg = config.services.msmtpq;
         in
         {
           options.services.msmtpq = {
             enable = lib.mkEnableOption "enable the systemd units for msmtpq";
-            package = lib.mkPackageOption self'.packages "msmtpq" { };
+            package = lib.mkPackageOption self.packages.${pkgs.system} "msmtpq" { };
           };
           config = lib.mkIf cfg.enable {
             environment.systemPackages = [ cfg.package ];
@@ -84,6 +81,6 @@
               user.timers.msmtp-queue.wantedBy = [ "timers.target" ];
             };
           };
-        });
-    });
-  }
+        };
+    };
+}
