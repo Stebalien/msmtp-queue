@@ -15,51 +15,52 @@
         "armv7l-linux"
       ];
       mkPackages = pkgs: rec {
-        msmtpq =
-          (pkgs.resholve.mkDerivation {
-            pname = "msmtpq";
-            version = "1.0.0";
-            src = ./.;
-            strictDeps = true;
-            nativeBuildInputs = with pkgs; [
-              gnumake
-              m4
-            ];
+        msmtpq = pkgs.resholve.mkDerivation {
+          pname = "msmtpq";
+          version = "1.0.0";
+          src = ./.;
+          strictDeps = true;
+          nativeBuildInputs = with pkgs; [
+            gnumake
+            m4
+          ];
 
-            installPhase = ''
-              mkdir -p $out/bin/
-              install -Dm755 msmtpq msmtpq-flush msmtpq-queue $out/bin
-              install -Dm644 -t "$out/share/systemd/user/" systemd/*
-            '';
+          # Resholved seems to move these already?
+          # I think there's a bug somewhere.
+          dontMoveSystemdUserUnits = true;
 
-            solutions = {
-              msmtpq = {
-                interpreter = "${pkgs.bash}/bin/bash";
-                scripts = [
-                  "bin/msmtpq"
-                  "bin/msmtpq-flush"
-                  "bin/msmtpq-queue"
-                ];
-                inputs = with pkgs; [
-                  util-linux
-                  coreutils
-                  findutils
-                  gnused
-                  (msmtp.override { withScripts = false; })
-                ];
-                execer = [
-                  "cannot:${pkgs.util-linux}/bin/flock"
-                ];
-              };
+          installPhase = ''
+            mkdir -p $out/bin/
+            install -m755 msmtpq msmtpq-flush msmtpq-queue $out/bin
+            install -Dm644 -t "$out/lib/systemd/user/" systemd/*
+          '';
+
+          postResholve = ''
+            substituteInPlace "$out/lib/systemd/user/msmtp-queue.service" \
+              --replace-fail '/usr/local/bin/msmtpq-flush' "$out/bin/msmtpq-flush"
+          '';
+
+          solutions = {
+            msmtpq = {
+              interpreter = "${pkgs.bash}/bin/bash";
+              scripts = [
+                "bin/msmtpq"
+                "bin/msmtpq-flush"
+                "bin/msmtpq-queue"
+              ];
+              inputs = with pkgs; [
+                util-linux
+                coreutils
+                findutils
+                gnused
+                (msmtp.override { withScripts = false; })
+              ];
+              execer = [
+                "cannot:${pkgs.util-linux}/bin/flock"
+              ];
             };
-          }).overrideAttrs
-            (old: {
-              preFixup = ''
-                substituteInPlace "$out/share/systemd/user/msmtp-queue.service" \
-                  --replace-fail '/usr/local/bin/msmtpq-flush' "$out/bin/msmtpq-flush"
-              ''
-              + old.preFixup;
-            });
+          };
+        };
         default = msmtpq;
       };
     in
