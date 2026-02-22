@@ -87,6 +87,7 @@
           };
           config = lib.mkIf cfg.enable {
             environment.systemPackages = [ cfg.package ];
+            programs.msmtp.package = lib.mkDefault (pkgs.msmtp.override { withScripts = false; });
             systemd = {
               packages = [ cfg.package ];
               user.paths.msmtp-queue.wantedBy = [ "paths.target" ];
